@@ -23,8 +23,17 @@ Control your Pulsar X3 gaming mouse on Linux without needing the Windows Pulsar 
 
 - Python 3.6+
 - PyUSB library
+- GTK4 and Libadwaita (for GUI)
 
 ## Installation
+
+### Arch Linux (AUR)
+
+```bash
+yay -S pulsar-x3-python
+```
+
+### Manual Installation
 
 ```bash
 # Install PyUSB
@@ -44,44 +53,54 @@ sudo udevadm trigger
 
 ## Usage
 
+### GUI
+
+```bash
+pulsar-x3-gui
+```
+
+The GUI provides a graphical interface for all mouse settings with real-time feedback.
+
+### CLI
+
 ```bash
 # Show all info
-python3 pulsar_x3.py --info
+pulsar-x3 --info
 
 # Set DPI directly
-python3 pulsar_x3.py --dpi 800
+pulsar-x3 --dpi 800
 
 # Switch DPI stage (like pressing the button on mouse)
-python3 pulsar_x3.py --stage 2
+pulsar-x3 --stage 2
 
 # Check battery
-python3 pulsar_x3.py --battery
+pulsar-x3 --battery
 
 # Motion sync
-python3 pulsar_x3.py --motion-sync on
-python3 pulsar_x3.py --motion-sync off
+pulsar-x3 --motion-sync on
+pulsar-x3 --motion-sync off
 
 # Lift-off distance
-python3 pulsar_x3.py --lod 0.7
-python3 pulsar_x3.py --lod 1
-python3 pulsar_x3.py --lod 2
+pulsar-x3 --lod 0.7
+pulsar-x3 --lod 1
+pulsar-x3 --lod 2
 
 # Angle snapping
-python3 pulsar_x3.py --angle-snap on
-python3 pulsar_x3.py --angle-snap off
+pulsar-x3 --angle-snap on
+pulsar-x3 --angle-snap off
 
 # Ripple control
-python3 pulsar_x3.py --ripple-control on
-python3 pulsar_x3.py --ripple-control off
+pulsar-x3 --ripple-control on
+pulsar-x3 --ripple-control off
 
 # Debounce time
-python3 pulsar_x3.py --debounce 3
+pulsar-x3 --debounce 3
 ```
 
 ## Example Output
 
 ```
-$ python3 pulsar_x3.py --info
+$ pulsar-x3 --info
 ✓ Found: Pulsar X3 (wireless mode)
 ======================================================================
 Pulsar X3 Mouse Information
