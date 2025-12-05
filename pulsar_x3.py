@@ -19,7 +19,10 @@ import struct
 import sys
 import argparse
 import time
+import fcntl
+import os
 
+LOCK_FILE = "/tmp/pulsar-x3.lock"
 VID = 0x3710
 PID_WIRED = 0x3410
 PID_WIRELESS = 0x5403
@@ -28,21 +31,28 @@ def calculate_checksum(data):
     """Calculate 16-bit checksum"""
     return sum(data[:-2]) & 0xFFFF
 
-def send_command(dev, command_bytes):
-    """Send command and return response"""
-    packet = bytearray(64)
-    packet[0] = 0x00  # Report ID
-    for i, byte in enumerate(command_bytes):
-        packet[i+1] = byte
+def send_command(dev, command_bytes, retries=3):
+    """Send command and return response with retry logic"""
+    for attempt in range(retries):
+        try:
+            packet = bytearray(64)
+            packet[0] = 0x00  # Report ID
+            for i, byte in enumerate(command_bytes):
+                packet[i+1] = byte
 
-    checksum = calculate_checksum(packet)
-    struct.pack_into('<H', packet, 62, checksum)
+            checksum = calculate_checksum(packet)
+            struct.pack_into('<H', packet, 62, checksum)
 
-    dev.ctrl_transfer(0x21, 0x09, 0x0300, 3, bytes(packet), timeout=1000)
-    time.sleep(0.05)
+            dev.ctrl_transfer(0x21, 0x09, 0x0300, 3, bytes(packet), timeout=1000)
+            time.sleep(0.05)
 
-    response = dev.ctrl_transfer(0xA1, 0x01, 0x0300, 3, 64, timeout=1000)
-    return response
+            response = dev.ctrl_transfer(0xA1, 0x01, 0x0300, 3, 64, timeout=1000)
+            return response
+        except usb.core.USBError as e:
+            if attempt < retries - 1:
+                time.sleep(0.1)
+                continue
+            raise
 
 def set_dpi(dev, dpi):
     """Set mouse DPI"""
@@ -316,6 +326,14 @@ def main():
         parser.print_help()
         return 0
 
+    # Acquire file lock to prevent concurrent access
+    lock_fd = open(LOCK_FILE, 'w')
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        print("Another instance is accessing the mouse, waiting...")
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+
     # Find device - try wireless first, then wired
     dev = usb.core.find(idVendor=VID, idProduct=PID_WIRELESS)
     mode = "wireless"
@@ -365,6 +383,9 @@ def main():
             dev.attach_kernel_driver(3)
         except:
             pass
+        # Release lock
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        lock_fd.close()
 
     return 0
 
