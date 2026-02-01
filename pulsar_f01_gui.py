@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Pulsar X3 Mouse Control - GTK4 GUI
+Pulsar Feinmann F01 Mouse Control - GTK4 GUI
 """
 
 import gi
@@ -14,12 +14,11 @@ import time
 import threading
 
 VID = 0x3710
-PID_WIRED = 0x3410
-PID_WIRELESS = 0x5403
+PID_WIRELESS = 0x5404  # Feinmann 8K Dongle
 
 
 class PulsarDevice:
-    """Handle communication with the Pulsar X3 mouse"""
+    """Handle communication with the Pulsar Feinmann F01 mouse"""
 
     def __init__(self):
         self.dev = None
@@ -29,10 +28,6 @@ class PulsarDevice:
         """Find and connect to the mouse"""
         self.dev = usb.core.find(idVendor=VID, idProduct=PID_WIRELESS)
         self.mode = "wireless"
-
-        if not self.dev:
-            self.dev = usb.core.find(idVendor=VID, idProduct=PID_WIRED)
-            self.mode = "wired"
 
         if not self.dev:
             return False
@@ -177,7 +172,7 @@ class PulsarDevice:
 
 class PulsarWindow(Adw.ApplicationWindow):
     def __init__(self, app):
-        super().__init__(application=app, title="Pulsar X3 Control")
+        super().__init__(application=app, title="Pulsar Feinmann F01 Control")
         self.set_default_size(380, 550)
 
         self.device = PulsarDevice()
@@ -328,7 +323,7 @@ class PulsarWindow(Adw.ApplicationWindow):
         self.updating = True
 
         self.status_banner.set_revealed(False)
-        self.device_row.set_subtitle(f"Pulsar X3 ({self.device.mode} mode)")
+        self.device_row.set_subtitle(f"Pulsar Feinmann F01 ({self.device.mode})")
         self.firmware_row.set_subtitle(f"Mouse: {info['mouse_fw']} | Dongle: {info['dongle_fw']}")
         self.battery_row.set_subtitle(f"{info['battery']}%")
 
@@ -425,7 +420,7 @@ class PulsarWindow(Adw.ApplicationWindow):
 class PulsarApp(Adw.Application):
     def __init__(self):
         super().__init__(
-            application_id="org.pulsar.x3control",
+            application_id="org.pulsar.f01control",
             flags=Gio.ApplicationFlags.FLAGS_NONE
         )
         self.window = None

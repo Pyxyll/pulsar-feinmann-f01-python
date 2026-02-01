@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 """
-Pulsar X3 Mouse Control for Linux
-Works with both wired (USB cable) and wireless (dongle) modes
+Pulsar Feinmann F01 Mouse Control for Linux
+Works via wireless dongle (Feinmann 8K Dongle)
+
+Based on pulsar-x3-python by jonkristian
+https://github.com/jonkristian/pulsar-x3-python
 
 Usage:
-    python3 pulsar_x3.py --info
-    python3 pulsar_x3.py --dpi 800
-    python3 pulsar_x3.py --stage 2
-    python3 pulsar_x3.py --motion-sync on
-    python3 pulsar_x3.py --lod 1
-    python3 pulsar_x3.py --angle-snap off
-    python3 pulsar_x3.py --ripple-control on
-    python3 pulsar_x3.py --debounce 3
+    python3 pulsar_f01.py --info
+    python3 pulsar_f01.py --dpi 800
+    python3 pulsar_f01.py --stage 2
+    python3 pulsar_f01.py --motion-sync on
+    python3 pulsar_f01.py --lod 1
+    python3 pulsar_f01.py --angle-snap off
+    python3 pulsar_f01.py --ripple-control on
+    python3 pulsar_f01.py --debounce 3
 """
 
 import usb.core
@@ -22,10 +25,9 @@ import time
 import fcntl
 import os
 
-LOCK_FILE = "/tmp/pulsar-x3.lock"
+LOCK_FILE = "/tmp/pulsar-f01.lock"
 VID = 0x3710
-PID_WIRED = 0x3410
-PID_WIRELESS = 0x5403
+PID_WIRELESS = 0x5404  # Feinmann 8K Dongle
 
 def calculate_checksum(data):
     """Calculate 16-bit checksum"""
@@ -99,7 +101,7 @@ def query_version(dev):
 def query_info(dev):
     """Query mouse information"""
     print("="*70)
-    print("Pulsar X3 Mouse Information")
+    print("Pulsar Feinmann F01 Mouse Information")
     print("="*70)
 
     # Dongle version from USB descriptor
@@ -309,7 +311,7 @@ def query_polling_rate(dev):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Control Pulsar X3 mouse (wired or wireless)')
+        description='Control Pulsar Feinmann F01 mouse (wireless)')
     parser.add_argument('--dpi', type=int, help='Set DPI (50-26000)')
     parser.add_argument('--stage', type=int, choices=[1, 2, 3, 4, 5, 6], help='Switch DPI stage (1-6)')
     parser.add_argument('--battery', action='store_true', help='Show battery percentage')
@@ -334,20 +336,15 @@ def main():
         print("Another instance is accessing the mouse, waiting...")
         fcntl.flock(lock_fd, fcntl.LOCK_EX)
 
-    # Find device - try wireless first, then wired
+    # Find device via wireless dongle
     dev = usb.core.find(idVendor=VID, idProduct=PID_WIRELESS)
-    mode = "wireless"
 
     if not dev:
-        dev = usb.core.find(idVendor=VID, idProduct=PID_WIRED)
-        mode = "wired"
-
-    if not dev:
-        print("ERROR: Pulsar X3 mouse not found!")
-        print("Make sure the mouse is connected (wired or wireless)")
+        print("ERROR: Pulsar Feinmann F01 dongle not found!")
+        print("Make sure the Feinmann 8K Dongle is plugged in")
         return 1
 
-    print(f"✓ Found: Pulsar X3 ({mode} mode)")
+    print(f"✓ Found: Pulsar Feinmann F01 (wireless)")
 
     # Detach kernel driver
     if dev.is_kernel_driver_active(3):

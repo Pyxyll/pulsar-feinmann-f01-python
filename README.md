@@ -1,6 +1,8 @@
-# Pulsar X3 Linux Control
+# Pulsar Feinmann F01 Linux Control
 
-Control your Pulsar X3 gaming mouse on Linux without needing the Windows Pulsar Fusion app. Works with both wired and wireless modes.
+Control your Pulsar Feinmann F01 gaming mouse on Linux without needing the Windows Pulsar Fusion app. Wireless only (via Feinmann 8K Dongle).
+
+Based on [pulsar-x3-python](https://github.com/jonkristian/pulsar-x3-python) by jonkristian.
 
 > **Disclaimer**: This is an unofficial, community-developed tool. It is not affiliated with, endorsed by, or supported by Pulsar Gaming Gears. Use at your own risk.
 
@@ -22,33 +24,21 @@ Control your Pulsar X3 gaming mouse on Linux without needing the Windows Pulsar 
 ## Requirements
 
 - Python 3.6+
-- PyUSB library
+- PyUSB library (`python-pyusb` on Arch)
 - GTK4 and Libadwaita (for GUI)
 
 ## Installation
 
-### Arch Linux (AUR)
-
 ```bash
-yay -S pulsar-x3-python
-```
-
-### Manual Installation
-
-```bash
-# Install PyUSB
-pip install pyusb
+# Install PyUSB (Arch Linux)
+sudo pacman -S python-pyusb
 
 # Setup udev rules for non-root access
-sudo tee /etc/udev/rules.d/99-pulsar-mouse.rules << 'EOF'
-SUBSYSTEM=="usb", ATTRS{idVendor}=="3710", ATTRS{idProduct}=="3410", MODE="0666"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="3710", ATTRS{idProduct}=="5403", MODE="0666"
-EOF
-
+sudo cp 99-pulsar-mouse.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 
-# Reconnect mouse after adding rules
+# Reconnect dongle after adding rules
 ```
 
 ## Usage
@@ -56,66 +46,59 @@ sudo udevadm trigger
 ### GUI
 
 ```bash
-pulsar-x3-gui
+python3 pulsar_f01_gui.py
 ```
-
-The GUI provides a graphical interface for all mouse settings with real-time feedback.
 
 ### CLI
 
 ```bash
 # Show all info
-pulsar-x3 --info
+python3 pulsar_f01.py --info
 
 # Set DPI directly
-pulsar-x3 --dpi 800
+python3 pulsar_f01.py --dpi 800
 
-# Switch DPI stage (like pressing the button on mouse)
-pulsar-x3 --stage 2
+# Switch DPI stage
+python3 pulsar_f01.py --stage 2
 
 # Check battery
-pulsar-x3 --battery
+python3 pulsar_f01.py --battery
 
 # Motion sync
-pulsar-x3 --motion-sync on
-pulsar-x3 --motion-sync off
+python3 pulsar_f01.py --motion-sync on
 
 # Lift-off distance
-pulsar-x3 --lod 0.7
-pulsar-x3 --lod 1
-pulsar-x3 --lod 2
+python3 pulsar_f01.py --lod 1
 
 # Angle snapping
-pulsar-x3 --angle-snap on
-pulsar-x3 --angle-snap off
+python3 pulsar_f01.py --angle-snap off
 
 # Ripple control
-pulsar-x3 --ripple-control on
-pulsar-x3 --ripple-control off
+python3 pulsar_f01.py --ripple-control on
 
 # Debounce time
-pulsar-x3 --debounce 3
+python3 pulsar_f01.py --debounce 3
 ```
 
 ## Example Output
 
 ```
-$ pulsar-x3 --info
-✓ Found: Pulsar X3 (wireless mode)
+$ python3 pulsar_f01.py --info
+✓ Found: Pulsar Feinmann F01 (wireless)
 ======================================================================
-Pulsar X3 Mouse Information
+Pulsar Feinmann F01 Mouse Information
 ======================================================================
 
 Dongle Firmware: 0123
-Mouse Firmware: 00.00.10.16
+Mouse Firmware: 00.00.00.00
 
-DPI: 1600 (stage 3)
+DPI: 700 (stage 1)
 Motion Sync: OFF
 Lift-off Distance: 1mm
 Angle Snapping: OFF
 Ripple Control: OFF
 Debounce: 3ms
-Battery: 80%
+Battery: 94%
 Polling Rate: 1000Hz (unreliable)
 ======================================================================
 ```
@@ -123,14 +106,14 @@ Polling Rate: 1000Hz (unreliable)
 ## Device Information
 
 - **Vendor ID**: `0x3710` (Pulsar)
-- **Product ID (Wired)**: `0x3410`
-- **Product ID (Wireless)**: `0x5403`
+- **Product ID (Feinmann 8K Dongle)**: `0x5404`
 - **Interface**: 3 (HID Feature Reports)
+- **Protocol**: Same as Pulsar X3 — 64-byte USB HID feature reports with 16-bit LE checksum
 
 ## Troubleshooting
 
 ### Permission denied
-Make sure udev rules are installed and you've reconnected the mouse.
+Make sure udev rules are installed and you've reconnected the dongle.
 
 ### Device not found
 ```bash
@@ -138,7 +121,4 @@ lsusb | grep 3710
 ```
 
 ### Polling rate
-Polling rate read/write is not working correctly. Use the Windows Pulsar Fusion app to change polling rate.
-
-### Settings reset after opening Windows Pulsar Fusion
-It appears the Pulsar Fusion app syncs its saved data to the mouse on launch, overwriting any changes made on Linux.
+Polling rate read/write is not working correctly. Use the Windows Pulsar Fusion/Bibimbap app to change polling rate.

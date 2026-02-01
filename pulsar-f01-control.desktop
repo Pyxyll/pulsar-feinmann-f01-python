@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Pulsar Feinmann F01 Control
+Comment=Control Pulsar Feinmann F01 gaming mouse settings
+Exec=pulsar-f01-gui
+Icon=input-mouse
+Terminal=false
+Type=Application
+Categories=Settings;HardwareSettings;
+Keywords=mouse;pulsar;feinmann;dpi;gaming;
